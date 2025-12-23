@@ -20,9 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -152,7 +150,7 @@ class AccountsControllerTest {
         @WithMockUser(username = "u1")
         void transactions_shouldUseCustomLimit() throws Exception {
             var page = new TransactionService.TransactionsPage(List.of(), null);
-            given(transactionService.listTransactions("u1", "acc-1", null, 50)).willReturn(page);
+            when(transactionService.listTransactions("u1", "acc-1", null, 50)).thenReturn(page);
 
             mockMvc.perform(get("/v1/accounts/{accountId}/transactions", "acc-1")
                             .param("limit", "50"))
@@ -164,7 +162,7 @@ class AccountsControllerTest {
         @WithMockUser(username = "u1")
         void transactions_shouldUseCursor() throws Exception {
             var page = new TransactionService.TransactionsPage(List.of(), null);
-            given(transactionService.listTransactions("u1", "acc-1", "cursor-abc", 20)).willReturn(page);
+            when(transactionService.listTransactions("u1", "acc-1", "cursor-abc", 20)).thenReturn(page);
 
             mockMvc.perform(get("/v1/accounts/{accountId}/transactions", "acc-1")
                             .param("cursor", "cursor-abc"))
@@ -205,7 +203,7 @@ class AccountsControllerTest {
                     ),
                     PageInfo.of(1, 20, 2)
             );
-            given(accountService.listAccounts("u1", new PageRequest(1, 20))).willReturn(paginatedResponse);
+            when(accountService.listAccounts("u1", new PageRequest(1, 20))).thenReturn(paginatedResponse);
 
             mockMvc.perform(get("/v1/accounts/goals"))
                     .andExpect(status().isOk())
@@ -230,7 +228,7 @@ class AccountsControllerTest {
                     List.of(new AccountSummary("acc-save", "SAVING", "THB", "123-456", "SCB", "#3357FF", 999.00)),
                     PageInfo.of(1, 20, 1)
             );
-            given(accountService.listAccounts("u1", new PageRequest(1, 20))).willReturn(paginatedResponse);
+            when(accountService.listAccounts("u1", new PageRequest(1, 20))).thenReturn(paginatedResponse);
 
             mockMvc.perform(get("/v1/accounts/goals"))
                     .andExpect(status().isOk())
@@ -251,7 +249,7 @@ class AccountsControllerTest {
                     ),
                     PageInfo.of(1, 20, 2)
             );
-            given(accountService.listAccounts("u1", new PageRequest(1, 20))).willReturn(paginatedResponse);
+            when(accountService.listAccounts("u1", new PageRequest(1, 20))).thenReturn(paginatedResponse);
 
             mockMvc.perform(get("/v1/accounts/goals"))
                     .andExpect(status().isOk())
@@ -276,7 +274,7 @@ class AccountsControllerTest {
                     ),
                     PageInfo.of(1, 20, 2)
             );
-            given(accountService.listAccounts("u1", new PageRequest(1, 20))).willReturn(paginatedResponse);
+            when(accountService.listAccounts("u1", new PageRequest(1, 20))).thenReturn(paginatedResponse);
 
             mockMvc.perform(get("/v1/accounts/loans"))
                     .andExpect(status().isOk())
@@ -300,7 +298,7 @@ class AccountsControllerTest {
                     List.of(new AccountSummary("acc-save", "SAVING", "THB", "123-456", "SCB", "#3357FF", 999.00)),
                     PageInfo.of(1, 20, 1)
             );
-            given(accountService.listAccounts("u1", new PageRequest(1, 20))).willReturn(paginatedResponse);
+            when(accountService.listAccounts("u1", new PageRequest(1, 20))).thenReturn(paginatedResponse);
 
             mockMvc.perform(get("/v1/accounts/loans"))
                     .andExpect(jsonPath("$.data").isArray())
@@ -320,7 +318,7 @@ class AccountsControllerTest {
                     ),
                     PageInfo.of(1, 20, 2)
             );
-            given(accountService.listAccounts("u1", new PageRequest(1, 20))).willReturn(paginatedResponse);
+            when(accountService.listAccounts("u1", new PageRequest(1, 20))).thenReturn(paginatedResponse);
 
             mockMvc.perform(get("/v1/accounts/loans"))
                     .andExpect(status().isOk())
@@ -347,7 +345,7 @@ class AccountsControllerTest {
                     ),
                     PageInfo.of(1, 10, 2)
             );
-            given(accountService.listQuickPayees("u1", new PageRequest(1, 10))).willReturn(paginatedResponse);
+            when(accountService.listQuickPayees("u1", new PageRequest(1, 10))).thenReturn(paginatedResponse);
 
             mockMvc.perform(get("/v1/accounts/payees"))
                     .andExpect(status().isOk())
@@ -372,7 +370,7 @@ class AccountsControllerTest {
                     List.of(new PayeeItem("p3", "name3", "img3.png", true)),
                     PageInfo.of(2, 5, 15)
             );
-            given(accountService.listQuickPayees("u1", new PageRequest(2, 5))).willReturn(paginatedResponse);
+            when(accountService.listQuickPayees("u1", new PageRequest(2, 5))).thenReturn(paginatedResponse);
 
             mockMvc.perform(get("/v1/accounts/payees")
                             .param("page", "2")
@@ -392,7 +390,7 @@ class AccountsControllerTest {
                     List.<PayeeItem>of(),
                     PageInfo.of(1, 10, 0)
             );
-            given(accountService.listQuickPayees("u1", new PageRequest(1, 10))).willReturn(emptyResponse);
+            when(accountService.listQuickPayees("u1", new PageRequest(1, 10))).thenReturn(emptyResponse);
 
             mockMvc.perform(get("/v1/accounts/payees"))
                     .andExpect(status().isOk())

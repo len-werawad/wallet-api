@@ -75,7 +75,7 @@ class AccountServiceImplTest {
 
             assertThat(result).hasSize(2);
 
-            AccountSummary summary1 = result.get(0);
+            AccountSummary summary1 = result.getFirst();
             assertThat(summary1.accountId()).isEqualTo("acc-1");
             assertThat(summary1.type()).isEqualTo("SAVING");
             assertThat(summary1.currency()).isEqualTo("THB");
@@ -127,7 +127,7 @@ class AccountServiceImplTest {
             List<AccountSummary> result = accountService.listAccounts(USER_ID);
 
             assertThat(result).hasSize(1);
-            assertThat(result.get(0).amount()).isEqualTo(0.0);
+            assertThat(result.getFirst().amount()).isEqualTo(0.0);
 
             verify(accountRepository).findByUserId(USER_ID);
             verify(balanceRepository).findByUserId(USER_ID);
@@ -148,7 +148,7 @@ class AccountServiceImplTest {
             List<AccountSummary> result = accountService.listAccounts(USER_ID);
 
             assertThat(result).hasSize(1);
-            assertThat(result.get(0).color()).isNull();
+            assertThat(result.getFirst().color()).isNull();
 
             verify(accountRepository).findByUserId(USER_ID);
             verify(balanceRepository).findByUserId(USER_ID);
@@ -176,9 +176,9 @@ class AccountServiceImplTest {
 
             assertThat(result).hasSize(3);
 
-            assertThat(result.get(0).accountId()).isEqualTo("acc-1");
-            assertThat(result.get(0).amount()).isEqualTo(1000.00);
-            assertThat(result.get(0).color()).isNull();
+            assertThat(result.getFirst().accountId()).isEqualTo("acc-1");
+            assertThat(result.getFirst().amount()).isEqualTo(1000.00);
+            assertThat(result.getFirst().color()).isNull();
 
             assertThat(result.get(1).accountId()).isEqualTo("acc-2");
             assertThat(result.get(1).amount()).isEqualTo(0.0);
@@ -218,10 +218,10 @@ class AccountServiceImplTest {
 
             assertThat(result).hasSize(3);
 
-            assertThat(result.get(0).payeeId()).isEqualTo("tx-1");
-            assertThat(result.get(0).name()).isEqualTo("John Doe");
-            assertThat(result.get(0).image()).isEqualTo("img1.png");
-            assertThat(result.get(0).favorite()).isTrue();
+            assertThat(result.getFirst().payeeId()).isEqualTo("tx-1");
+            assertThat(result.getFirst().name()).isEqualTo("John Doe");
+            assertThat(result.getFirst().image()).isEqualTo("img1.png");
+            assertThat(result.getFirst().favorite()).isTrue();
 
             assertThat(result.get(1).payeeId()).isEqualTo("tx-2");
             assertThat(result.get(1).favorite()).isFalse();
@@ -249,7 +249,7 @@ class AccountServiceImplTest {
             List<PayeeItem> result = accountService.listQuickPayees(USER_ID, limit);
 
             assertThat(result).hasSize(2);
-            assertThat(result.get(0).payeeId()).isEqualTo("tx-1");
+            assertThat(result.getFirst().payeeId()).isEqualTo("tx-1");
             assertThat(result.get(1).payeeId()).isEqualTo("tx-2");
 
             verify(transactionService).listTransactionSummaries(USER_ID);
@@ -295,7 +295,7 @@ class AccountServiceImplTest {
 
 
             assertThat(result).hasSize(2);
-            assertThat(result.get(0).favorite()).isFalse();
+            assertThat(result.getFirst().favorite()).isFalse();
             assertThat(result.get(1).favorite()).isFalse();
 
             verify(transactionService).listTransactionSummaries(USER_ID);
@@ -320,7 +320,7 @@ class AccountServiceImplTest {
 
 
             assertThat(result).hasSize(1);
-            assertThat(result.get(0).payeeId()).isEqualTo("tx-1");
+            assertThat(result.getFirst().payeeId()).isEqualTo("tx-1");
 
             verify(transactionService).listTransactionSummaries(USER_ID);
             verify(flagRepository).findByUserIdAndFlagType(USER_ID, FAVORITE);
