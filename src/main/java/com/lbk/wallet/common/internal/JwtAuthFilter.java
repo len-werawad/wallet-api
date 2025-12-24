@@ -1,5 +1,6 @@
-package com.lbk.wallet.common.api;
+package com.lbk.wallet.common.internal;
 
+import com.lbk.wallet.common.api.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

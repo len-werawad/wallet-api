@@ -1,4 +1,4 @@
-package com.lbk.wallet.common.api;
+package com.lbk.wallet.common.internal;
 
 import com.lbk.wallet.common.api.dto.ErrorEnvelope;
 import com.lbk.wallet.common.api.dto.PaginatedResponse;

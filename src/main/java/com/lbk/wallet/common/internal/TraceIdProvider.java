@@ -1,4 +1,4 @@
-package com.lbk.wallet.common.api;
+package com.lbk.wallet.common.internal;
 
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;

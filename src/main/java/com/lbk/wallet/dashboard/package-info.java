@@ -1,6 +1,6 @@
 @org.springframework.modulith.ApplicationModule(
-        displayName = "Authentication Module",
+        displayName = "Dashboard Module",
         allowedDependencies = {"common :: api"}
 )
-package com.lbk.wallet.auth;
+package com.lbk.wallet.dashboard;
 

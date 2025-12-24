@@ -1,5 +1,6 @@
-package com.lbk.wallet.common.api;
+package com.lbk.wallet.common.internal;
 
+import com.lbk.wallet.common.api.ApiException;
 import com.lbk.wallet.common.api.dto.ErrorEnvelope;
 import com.lbk.wallet.common.api.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
