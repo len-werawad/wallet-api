@@ -11,8 +11,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.CompletableFuture;
-
 @Component
 @Slf4j
 public class DashboardEventHandler {
@@ -71,18 +69,16 @@ public class DashboardEventHandler {
      * This ensures all dashboard data is cached and ready for quick access
      */
     private void preWarmDashboardCaches(String userId) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                log.debug("Pre-warming dashboard cache by calling getDashboard() for user: {}", userId);
+        try {
+            log.debug("Pre-warming dashboard cache by calling getDashboard() for user: {}", userId);
 
-                // Call getDashboard() to populate the cache with complete dashboard data
-                dashboardService.getDashboard(userId);
+            // Call getDashboard() to populate the cache with complete dashboard data
+            dashboardService.getDashboard(userId);
 
-                log.debug("Dashboard cache pre-warmed successfully for user: {}", userId);
-            } catch (Exception e) {
-                log.error("Failed to pre-warm dashboard cache for user: {}", userId, e);
-            }
-        });
+            log.debug("Dashboard cache pre-warmed successfully for user: {}", userId);
+        } catch (Exception e) {
+            log.error("Failed to pre-warm dashboard cache for user: {}", userId, e);
+        }
     }
 
     private void evictUserCache(String userId) {

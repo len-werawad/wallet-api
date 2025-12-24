@@ -39,5 +39,4 @@ ALTER TABLE transactions
   ADD INDEX idx_tx_user_created (user_id, created_at DESC);
 
 ALTER TABLE app_config
-    ADD COLUMN app_version_code INT NULL,
-  ADD INDEX idx_app_config_env_platform_code (environment, platform, app_version_code);
+  ADD INDEX idx_app_config_env_platform_code (environment, platform, app_version);
