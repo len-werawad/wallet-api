@@ -44,6 +44,7 @@ class AccountServiceImpl implements AccountService {
     @Override
     public List<AccountSummary> listAccounts(String userId) {
         log.debug("Fetching accounts for user: {}", userId);
+        long startTime = System.currentTimeMillis();
 
         Map<String, BigDecimal> balByAcc = getBalancesByUserId(userId);
 
@@ -53,17 +54,11 @@ class AccountServiceImpl implements AccountService {
         }
 
         var accounts = this.accounts.findByUserId(userId).stream()
-                .map(a -> {
-                    BigDecimal bal = balByAcc.get(a.getAccountId());
-                    var det = detByAcc.get(a.getAccountId());
-                    double amount = bal == null ? 0.0 : bal.doubleValue();
-                    String color = det == null ? null : det.getColor();
-                    String status = det == null ? null : getStatus(det.getProgress());
-                    return new AccountSummary(a.getAccountId(), a.getType(), a.getCurrency(), a.getAccountNumber(), a.getIssuer(), color, amount, status);
-                })
+                .map(a -> mapToAccountSummary(a, balByAcc, detByAcc))
                 .toList();
 
-        log.info("Retrieved {} accounts for user: {}", accounts.size(), userId);
+        long duration = System.currentTimeMillis() - startTime;
+        log.info("Retrieved {} accounts for user: {} in {}ms", accounts.size(), userId, duration);
         return accounts;
     }
 
@@ -81,25 +76,33 @@ class AccountServiceImpl implements AccountService {
             accDetail.put(d.getAccountId(), d);
         }
 
-        var accountSummaries = accountPage.getContent().stream()
-                .map(a -> {
-                    BigDecimal bal = accBalance.get(a.getAccountId());
-                    var det = accDetail.get(a.getAccountId());
-                    double amount = bal == null ? 0.0 : bal.doubleValue();
-                    String color = det == null ? null : det.getColor();
-                    return new AccountSummary(a.getAccountId(), a.getType(), a.getCurrency(), a.getAccountNumber(), a.getIssuer(), color, amount, getStatus(det.getProgress()));
-                })
-                .toList();
+        log.info("Retrieved {} accounts for user: {} (page {} of {})", accountPage.getContent().size(), userId, pageRequest.page(), accountPage.getTotalPages());
+        return PaginatedResponse.fromSpringPage(accountPage.map(a -> mapToAccountSummary(a, accBalance, accDetail)));
+    }
 
-        log.info("Retrieved {} accounts for user: {} (page {} of {})", accountSummaries.size(), userId, pageRequest.page(), accountPage.getTotalPages());
-        return PaginatedResponse.fromSpringPage(accountPage.map(a -> {
-            BigDecimal bal = accBalance.get(a.getAccountId());
-            var det = accDetail.get(a.getAccountId());
-            double amount = bal == null ? 0.0 : bal.doubleValue();
-            String color = det == null ? null : det.getColor();
-            String status = det == null ? null : getStatus(det.getProgress());
-            return new AccountSummary(a.getAccountId(), a.getType(), a.getCurrency(), a.getAccountNumber(), a.getIssuer(), color, amount, status);
-        }));
+    /**
+     * Maps AccountEntity to AccountSummary with balance and detail information
+     */
+    private AccountSummary mapToAccountSummary(
+            AccountEntity account,
+            Map<String, BigDecimal> balances,
+            Map<String, AccountDetailEntity> details
+    ) {
+        BigDecimal bal = balances.get(account.getAccountId());
+        var det = details.get(account.getAccountId());
+        double amount = bal == null ? 0.0 : bal.doubleValue();
+        String color = det == null ? null : det.getColor();
+        String status = det == null ? null : getStatus(det.getProgress());
+        return new AccountSummary(
+                account.getAccountId(),
+                account.getType(),
+                account.getCurrency(),
+                account.getAccountNumber(),
+                account.getIssuer(),
+                color,
+                amount,
+                status
+        );
     }
 
     private String getStatus(Integer progress) {

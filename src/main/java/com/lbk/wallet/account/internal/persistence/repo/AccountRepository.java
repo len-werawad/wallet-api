@@ -9,5 +9,6 @@ import java.util.List;
 
 public interface AccountRepository extends JpaRepository<AccountEntity, String> {
     List<AccountEntity> findByUserId(String userId);
+
     Page<AccountEntity> findByUserId(String userId, Pageable pageable);
 }

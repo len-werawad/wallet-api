@@ -4,10 +4,10 @@ package com.lbk.wallet.common.api.dto;
  * Pagination information for responses
  */
 public record PageInfo(
-    Integer page,
-    Integer limit,
-    Long total,
-    Integer totalPages
+        Integer page,
+        Integer limit,
+        Long total,
+        Integer totalPages
 ) {
     public static PageInfo of(int page, int limit, long total) {
         int totalPages = (int) Math.ceil((double) total / limit);
@@ -16,10 +16,10 @@ public record PageInfo(
 
     public static PageInfo fromSpringPage(org.springframework.data.domain.Page<?> springPage) {
         return new PageInfo(
-            springPage.getNumber() + 1, // Convert to 1-based
-            springPage.getSize(),
-            springPage.getTotalElements(),
-            springPage.getTotalPages()
+                springPage.getNumber() + 1, // Convert to 1-based
+                springPage.getSize(),
+                springPage.getTotalElements(),
+                springPage.getTotalPages()
         );
     }
 }

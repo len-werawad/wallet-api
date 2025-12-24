@@ -7,8 +7,8 @@ import jakarta.validation.constraints.Min;
  * Standard pagination request parameters
  */
 public record PageRequest(
-    @Min(1) Integer page,
-    @Min(1) @Max(100) Integer limit
+        @Min(1) Integer page,
+        @Min(1) @Max(100) Integer limit
 ) {
     public static final int DEFAULT_PAGE = 1;
     public static final int DEFAULT_LIMIT = 20;

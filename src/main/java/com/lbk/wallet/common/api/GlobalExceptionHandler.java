@@ -29,7 +29,8 @@ public class GlobalExceptionHandler {
         var body = new ErrorEnvelope(new ErrorResponse(
                 ex.status().value(),
                 ex.code(),
-                ex.getMessage()
+                ex.getMessage(),
+                TraceIdProvider.getTraceId()
         ));
         return ResponseEntity.status(ex.status()).body(body);
     }
@@ -46,7 +47,8 @@ public class GlobalExceptionHandler {
         var body = new ErrorEnvelope(new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "VALIDATION_ERROR",
-                message
+                message,
+                TraceIdProvider.getTraceId()
         ));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
@@ -58,7 +60,8 @@ public class GlobalExceptionHandler {
         var body = new ErrorEnvelope(new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "VALIDATION_ERROR",
-                "Missing required header."
+                "Missing required header.",
+                TraceIdProvider.getTraceId()
         ));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
@@ -75,7 +78,8 @@ public class GlobalExceptionHandler {
         var body = new ErrorEnvelope(new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "VALIDATION_ERROR",
-                message
+                message,
+                TraceIdProvider.getTraceId()
         ));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
@@ -86,7 +90,8 @@ public class GlobalExceptionHandler {
         var body = new ErrorEnvelope(new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "INTERNAL_ERROR",
-                "Unexpected error."
+                "Unexpected error.",
+                TraceIdProvider.getTraceId()
         ));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }

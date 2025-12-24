@@ -1,4 +1,4 @@
-package com.lbk.wallet.common.api.interceptor;
+package com.lbk.wallet.common.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,8 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import java.util.UUID;
-
 @Component
 public class LoggingInterceptor implements HandlerInterceptor {
 
@@ -19,17 +17,15 @@ public class LoggingInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String traceId = UUID.randomUUID().toString().substring(0, 8);
-        MDC.put("traceId", traceId);
-
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
             MDC.put("userId", auth.getName());
         }
 
-        log.debug("Incoming request method: {} uri: {}",
+        log.debug("Incoming request method: {} uri: {} traceId: {}",
                 request.getMethod(),
-                request.getRequestURI());
+                request.getRequestURI(),
+                MDC.get("traceId"));
 
         request.setAttribute("startTime", System.currentTimeMillis());
         return true;
@@ -42,16 +38,18 @@ public class LoggingInterceptor implements HandlerInterceptor {
             long duration = System.currentTimeMillis() - startTime;
 
             // Log response
-            log.debug("Completed request: {} {} - Status: {} - Duration: {}ms",
+            log.debug("Completed request: {} {} - Status: {} - Duration: {}ms traceId: {}",
                     request.getMethod(),
                     request.getRequestURI(),
                     response.getStatus(),
-                    duration);
+                    duration, MDC.get("traceId"));
 
             if (ex != null) {
-                log.error("Request failed with exception: {} {}",
+                log.error("Request failed with exception: {} {} traceId: {}",
                         request.getMethod(),
-                        request.getRequestURI(), ex);
+                        request.getRequestURI(),
+                        MDC.get("traceId"),
+                        ex);
             }
         } finally {
             // Clean up MDC

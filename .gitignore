@@ -29,14 +29,18 @@ logs/
 *.pid.lock
 
 ### === Application config (environment-specific) ===
-application-local.yml
-application-dev.yml
-application-uat.yml
-application-prod.yml
+# Allow template files to be committed
+# application-local.yml
+# application-dev.yml
+# application-prod.yml
 
-# Or dotenv
+# Environment variables
 .env
-.env.*
+.env.local
+.env.*.local
+
+# But allow the example file
+!.env.example
 
 ### === Database / Migration temp ===
 *.db

@@ -1,6 +1,6 @@
-package com.lbk.wallet.common.api.config;
+package com.lbk.wallet.common.config;
 
-import com.lbk.wallet.common.api.interceptor.LoggingInterceptor;
+import com.lbk.wallet.common.interceptor.LoggingInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

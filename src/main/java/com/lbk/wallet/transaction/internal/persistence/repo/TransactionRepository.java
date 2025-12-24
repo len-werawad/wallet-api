@@ -9,5 +9,6 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<TransactionEntity, String> {
     List<TransactionEntity> findByUserIdOrderByTransactionIdAsc(String userId);
+
     Page<TransactionEntity> findByUserIdOrderByTransactionIdAsc(String userId, Pageable pageable);
 }

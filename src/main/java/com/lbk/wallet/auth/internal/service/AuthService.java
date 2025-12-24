@@ -6,5 +6,6 @@ import com.lbk.wallet.auth.web.TokenResponse;
 
 public interface AuthService {
     TokenResponse login(LoginRequest request);
+
     TokenResponse refresh(RefreshRequest request);
 }

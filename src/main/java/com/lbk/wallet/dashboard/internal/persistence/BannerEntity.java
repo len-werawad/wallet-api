@@ -1,4 +1,4 @@
-package com.lbk.wallet.banner.internal.persistence.entity;
+package com.lbk.wallet.dashboard.internal.persistence;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
