@@ -52,7 +52,7 @@ services:
       JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-900000}
       JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION:-604800000}
 
-      # ---- DB (match application.yml keys) ----
+      # ---- DB ----
       DB_URL: ${DB_URL:-jdbc:mysql://mysql:3306/social_banking_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
       DB_USERNAME: ${DB_USERNAME:-app}
       DB_PASSWORD: ${DB_PASSWORD:-app}
