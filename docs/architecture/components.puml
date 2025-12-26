@@ -1,0 +1,35 @@
+@startuml
+' This file is copied from build output so it can be committed and embedded in README.
+' Regenerate by running: ./gradlew test --tests com.lbk.socialbanking.ModularityTest
+
+set separator none
+title WalletApplication
+
+top to bottom direction
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Component>
+
+Container_Boundary("WalletApplication.WalletApplication_boundary", "WalletApplication", $tags="") {
+  Component(WalletApplication.WalletApplication.CustomerModule, "Customer Module", $techn="Module", $descr="", $tags="", $link="")
+  Component(WalletApplication.WalletApplication.CommonModule, "Common Module", $techn="Module", $descr="", $tags="", $link="")
+  Component(WalletApplication.WalletApplication.AuthenticationModule, "Authentication Module", $techn="Module", $descr="", $tags="", $link="")
+  Component(WalletApplication.WalletApplication.AppConfigModule, "App Config Module", $techn="Module", $descr="", $tags="", $link="")
+  Component(WalletApplication.WalletApplication.AccountModule, "Account Module", $techn="Module", $descr="", $tags="", $link="")
+  Component(WalletApplication.WalletApplication.DashboardModule, "Dashboard Module", $techn="Module", $descr="", $tags="", $link="")
+  Component(WalletApplication.WalletApplication.TransactionModule, "Transaction Module", $techn="Module", $descr="", $tags="", $link="")
+}
+
+Rel(WalletApplication.WalletApplication.DashboardModule, WalletApplication.WalletApplication.AuthenticationModule, "listens to", $techn="", $tags="", $link="")
+Rel(WalletApplication.WalletApplication.DashboardModule, WalletApplication.WalletApplication.CommonModule, "depends on", $techn="", $tags="", $link="")
+Rel(WalletApplication.WalletApplication.DashboardModule, WalletApplication.WalletApplication.CustomerModule, "uses", $techn="", $tags="", $link="")
+Rel(WalletApplication.WalletApplication.DashboardModule, WalletApplication.WalletApplication.AccountModule, "uses", $techn="", $tags="", $link="")
+Rel(WalletApplication.WalletApplication.AppConfigModule, WalletApplication.WalletApplication.CommonModule, "depends on", $techn="", $tags="", $link="")
+Rel(WalletApplication.WalletApplication.AccountModule, WalletApplication.WalletApplication.CommonModule, "depends on", $techn="", $tags="", $link="")
+Rel(WalletApplication.WalletApplication.AccountModule, WalletApplication.WalletApplication.TransactionModule, "uses", $techn="", $tags="", $link="")
+Rel(WalletApplication.WalletApplication.AuthenticationModule, WalletApplication.WalletApplication.CommonModule, "uses", $techn="", $tags="", $link="")
+
+SHOW_LEGEND(true)
+@enduml
+

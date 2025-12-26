@@ -9,7 +9,7 @@ public class ModularityTest {
 
     @Test
     public void applicationModules() {
-       ApplicationModules modules = ApplicationModules.of(WalletApplication.class);
+       ApplicationModules modules = ApplicationModules.of(SocialBankingApplication.class);
         modules.forEach(System.out::println);
         modules.verify();
 
@@ -17,7 +17,7 @@ public class ModularityTest {
 
     @Test
     void createDocumentation(){
-        ApplicationModules modules = ApplicationModules.of(WalletApplication.class);
+        ApplicationModules modules = ApplicationModules.of(SocialBankingApplication.class);
         new Documenter(modules).writeDocumentation();
     }
 }
