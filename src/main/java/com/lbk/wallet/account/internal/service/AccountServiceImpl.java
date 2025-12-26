@@ -30,6 +30,7 @@ class AccountServiceImpl implements AccountService {
 
     private static final String TYPE_GOAL = "GOAL";
     private static final String TYPE_LOAN = "LOAN";
+    private static final String FLAG_FAVORITE = "FAVORITE";
 
     private final AccountRepository accounts;
     private final AccountBalanceRepository balances;
@@ -85,9 +86,6 @@ class AccountServiceImpl implements AccountService {
         return PaginatedResponse.fromSpringPage(accountPage.map(a -> mapToAccountSummary(a, accBalance, accDetail)));
     }
 
-    /**
-     * Maps AccountEntity to AccountSummary with balance and detail information
-     */
     private AccountSummary mapToAccountSummary(
             AccountEntity account,
             Map<String, BigDecimal> balances,
@@ -128,7 +126,7 @@ class AccountServiceImpl implements AccountService {
         log.debug("Fetching {} quick payees for user: {}", limit, userId);
 
         Set<String> favorites = new HashSet<>();
-        flags.findByUserIdAndFlagType(userId, "FAVORITE")
+        flags.findByUserIdAndFlagType(userId, FLAG_FAVORITE)
                 .forEach(f -> favorites.add(f.getAccountId()));
 
         var payees = transactionService.listTransactionSummaries(userId).stream()
@@ -150,7 +148,7 @@ class AccountServiceImpl implements AccountService {
         log.debug("Fetching paginated quick payees for user: {}, page: {}, limit: {}", userId, pageRequest.page(), pageRequest.limit());
 
         Set<String> favorites = new HashSet<>();
-        flags.findByUserIdAndFlagType(userId, "FAVORITE")
+        flags.findByUserIdAndFlagType(userId, FLAG_FAVORITE)
                 .forEach(f -> favorites.add(f.getAccountId()));
 
         var allPayees = transactionService.listTransactionSummaries(userId);

@@ -19,7 +19,7 @@ public class AuthEventPublisher {
         this.eventPublisher = eventPublisher;
     }
 
-    @Async("dashboardEventExecutor")
+    @Async("eventExecutor")
     public void publishUserLoggedIn(String userId) {
         try {
             log.debug("Publishing user logged in event for user: {}", userId);

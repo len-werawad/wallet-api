@@ -3,7 +3,6 @@ package com.lbk.wallet.dashboard.internal.handlers;
 import com.lbk.wallet.auth.events.UserLoggedInEvent;
 import com.lbk.wallet.dashboard.internal.servcie.DashboardService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.event.EventListener;
@@ -20,7 +19,7 @@ public class DashboardEventHandler {
     private final CacheManager cacheManager;
     private final DashboardService dashboardService;
 
-    public DashboardEventHandler(@Qualifier("dashboardCacheManager") CacheManager cacheManager,
+    public DashboardEventHandler(CacheManager cacheManager,
                                  DashboardService dashboardService) {
         this.cacheManager = cacheManager;
         this.dashboardService = dashboardService;
@@ -30,7 +29,7 @@ public class DashboardEventHandler {
      * Handle user login events - invalidate cache and pre-warm with getDashboard()
      */
     @EventListener
-    @Async("dashboardEventExecutor")
+    @Async("eventExecutor")
     @Transactional
     public void handleUserLoggedIn(UserLoggedInEvent event) {
         log.info("User logged in - updating dashboard cache for user: {}", event.getUserId());

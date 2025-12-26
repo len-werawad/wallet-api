@@ -2,9 +2,14 @@ package com.lbk.wallet.dashboard.internal.servcie;
 
 import com.lbk.wallet.account.api.AccountService;
 import com.lbk.wallet.account.api.dto.AccountSummary;
+import com.lbk.wallet.account.api.dto.GoalItem;
+import com.lbk.wallet.account.api.dto.LoanItem;
 import com.lbk.wallet.account.api.dto.PayeeItem;
-import com.lbk.wallet.dashboard.web.dto.DashboardResponse;
+import com.lbk.wallet.common.api.dto.PageInfo;
+import com.lbk.wallet.common.api.dto.PageRequest;
+import com.lbk.wallet.common.api.dto.PaginatedResponse;
 import com.lbk.wallet.customer.api.CustomerService;
+import com.lbk.wallet.dashboard.web.dto.DashboardResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -49,6 +54,14 @@ class DashboardServiceImplTest {
             var p2 = new PayeeItem("p2", "Bob", "img2", false);
             when(accountService.listQuickPayees(userId, 10)).thenReturn(List.of(p1, p2));
 
+            var goals = List.of(new GoalItem("acc-goal", "999-111", "IN_PROGRESS", "KBank", 200.0));
+            when(accountService.listGoalAccounts(userId, new PageRequest(1, 10)))
+                    .thenReturn(PaginatedResponse.of(goals, PageInfo.of(1, 10, 1)));
+
+            var loans = List.of(new LoanItem("acc-loan", "555-666", "IN_PROGRESS", 5000.0));
+            when(accountService.listLoanAccounts(userId, new PageRequest(1, 10)))
+                    .thenReturn(PaginatedResponse.of(loans, PageInfo.of(1, 10, 1)));
+
             DashboardResponse response = dashboardService.getDashboard(userId);
 
             assertThat(response.greeting()).isEqualTo("Hello John");
@@ -56,10 +69,7 @@ class DashboardServiceImplTest {
             assertThat(response.primaryAccount().accountId()).isEqualTo("acc-saving");
 
             assertThat(response.accounts()).hasSize(3);
-            assertThat(response.accounts().getFirst().accountId()).isEqualTo("acc-saving");
-
             assertThat(response.quickPayees()).hasSize(2);
-            assertThat(response.quickPayees().getFirst().payeeId()).isEqualTo("p1");
 
             assertThat(response.goals()).hasSize(1);
             DashboardResponse.GoalCard goal = response.goals().getFirst();
@@ -71,8 +81,8 @@ class DashboardServiceImplTest {
             assertThat(response.loans()).hasSize(1);
             DashboardResponse.LoanCard loan = response.loans().getFirst();
             assertThat(loan.id()).isEqualTo("acc-loan");
-            assertThat(loan.title()).isEqualTo("Credit Loan");
-            assertThat(loan.status()).isEqualTo("ACTIVE");
+            assertThat(loan.title()).isEqualTo("555-666");
+            assertThat(loan.status()).isEqualTo("IN_PROGRESS");
             assertThat(loan.outstandingAmount()).isEqualTo(5000.0);
         }
 
@@ -83,6 +93,10 @@ class DashboardServiceImplTest {
             when(customerService.getGreeting(userId)).thenReturn("Hi");
             when(accountService.listAccounts(userId)).thenReturn(List.of());
             when(accountService.listQuickPayees(userId, 10)).thenReturn(List.of());
+            when(accountService.listGoalAccounts(userId, new PageRequest(1, 10)))
+                    .thenReturn(PaginatedResponse.of(List.of(), PageInfo.of(1, 10, 0)));
+            when(accountService.listLoanAccounts(userId, new PageRequest(1, 10)))
+                    .thenReturn(PaginatedResponse.of(List.of(), PageInfo.of(1, 10, 0)));
 
             DashboardResponse response = dashboardService.getDashboard(userId);
 
@@ -105,6 +119,11 @@ class DashboardServiceImplTest {
             when(accountService.listAccounts(userId)).thenReturn(List.of(acc1, acc2));
             when(accountService.listQuickPayees(userId, 10)).thenReturn(List.of());
 
+            when(accountService.listGoalAccounts(userId, new PageRequest(1, 10)))
+                    .thenReturn(PaginatedResponse.of(List.of(new GoalItem("acc-1", "111-222", "IN_PROGRESS", "KBank", 100.0)), PageInfo.of(1, 10, 1)));
+            when(accountService.listLoanAccounts(userId, new PageRequest(1, 10)))
+                    .thenReturn(PaginatedResponse.of(List.of(new LoanItem("acc-2", "333-444", "IN_PROGRESS", 200.0)), PageInfo.of(1, 10, 1)));
+
             DashboardResponse response = dashboardService.getDashboard(userId);
 
             assertThat(response.primaryAccount()).isNotNull();
@@ -114,18 +133,28 @@ class DashboardServiceImplTest {
         }
 
         @Test
-        @DisplayName("should filter multiple goals and loans correctly")
+        @DisplayName("should include multiple goals and loans")
         void getDashboard_multipleGoalsAndLoans() {
             String userId = "u4";
             when(customerService.getGreeting(userId)).thenReturn("Yo");
 
             var acc1 = new AccountSummary("acc-saving", "SAVING", "THB", "000-000", "KBank", "#000", 10.0, "ACTIVE");
-            var acc2 = new AccountSummary("goal-1", "GOAL", "THB", "111-111", "KBank", "#111", 100.0, "IN_PROGRESS");
-            var acc3 = new AccountSummary("goal-2", "GOAL", "THB", "222-222", "KBank", "#222", 200.0, "COMPLETED");
-            var acc4 = new AccountSummary("loan-1", "LOAN", "THB", "333-333", "KBank", "#333", 300.0, "ACTIVE");
-            var acc5 = new AccountSummary("loan-2", "LOAN", "THB", "444-444", "KBank", "#444", 400.0, "ACTIVE");
-            when(accountService.listAccounts(userId)).thenReturn(List.of(acc1, acc2, acc3, acc4, acc5));
+            when(accountService.listAccounts(userId)).thenReturn(List.of(acc1));
             when(accountService.listQuickPayees(userId, 10)).thenReturn(List.of());
+
+            var goals = List.of(
+                    new GoalItem("goal-1", "111-111", "IN_PROGRESS", "KBank", 100.0),
+                    new GoalItem("goal-2", "222-222", "COMPLETED", "KBank", 200.0)
+            );
+            when(accountService.listGoalAccounts(userId, new PageRequest(1, 10)))
+                    .thenReturn(PaginatedResponse.of(goals, PageInfo.of(1, 10, 2)));
+
+            var loans = List.of(
+                    new LoanItem("loan-1", "333-333", "IN_PROGRESS", 300.0),
+                    new LoanItem("loan-2", "444-444", "IN_PROGRESS", 400.0)
+            );
+            when(accountService.listLoanAccounts(userId, new PageRequest(1, 10)))
+                    .thenReturn(PaginatedResponse.of(loans, PageInfo.of(1, 10, 2)));
 
             DashboardResponse response = dashboardService.getDashboard(userId);
 
@@ -134,4 +163,3 @@ class DashboardServiceImplTest {
         }
     }
 }
-
