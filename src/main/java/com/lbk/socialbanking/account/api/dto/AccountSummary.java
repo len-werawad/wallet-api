@@ -1,0 +1,13 @@
+package com.lbk.socialbanking.account.api.dto;
+
+public record AccountSummary(
+        String accountId,
+        String type,
+        String currency,
+        String accountNumber,
+        String issuer,
+        String color,
+        double amount,
+        String status
+) {
+}
