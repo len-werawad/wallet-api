@@ -1,7 +1,6 @@
 package com.lbk.socialbanking.dashboard.web;
 
 import com.lbk.socialbanking.dashboard.internal.servcie.DashboardService;
-import com.lbk.socialbanking.dashboard.web.dto.DashboardResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -4,7 +4,6 @@ import com.lbk.socialbanking.account.api.dto.AccountSummary;
 import com.lbk.socialbanking.account.api.dto.PayeeItem;
 import com.lbk.socialbanking.common.api.JwtService;
 import com.lbk.socialbanking.dashboard.internal.servcie.DashboardService;
-import com.lbk.socialbanking.dashboard.web.dto.DashboardResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

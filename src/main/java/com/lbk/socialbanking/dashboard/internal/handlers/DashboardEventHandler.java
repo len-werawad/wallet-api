@@ -2,17 +2,16 @@ package com.lbk.socialbanking.dashboard.internal.handlers;
 
 import com.lbk.socialbanking.auth.events.UserLoggedInEvent;
 import com.lbk.socialbanking.dashboard.internal.servcie.DashboardService;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Slf4j
 public class DashboardEventHandler {
+    private static final Logger log = LoggerFactory.getLogger(DashboardEventHandler.class);
 
     private static final String DASHBOARD_CACHE = "dashboardData";
 
@@ -29,8 +28,6 @@ public class DashboardEventHandler {
      * Handle user login events - invalidate cache and pre-warm with getDashboard()
      */
     @EventListener
-    @Async("eventExecutor")
-    @Transactional
     public void handleUserLoggedIn(UserLoggedInEvent event) {
         log.info("User logged in - updating dashboard cache for user: {}", event.getUserId());
 

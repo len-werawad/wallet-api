@@ -9,15 +9,17 @@ public class ModularityTest {
 
     @Test
     public void applicationModules() {
-       ApplicationModules modules = ApplicationModules.of(SocialBankingApplication.class);
+        ApplicationModules modules = ApplicationModules.of(SocialBankingApplication.class);
         modules.forEach(System.out::println);
         modules.verify();
 
     }
 
     @Test
-    void createDocumentation(){
-        ApplicationModules modules = ApplicationModules.of(SocialBankingApplication.class);
-        new Documenter(modules).writeDocumentation();
+    public void writeDocumentation() {
+        var modules = ApplicationModules.of(SocialBankingApplication.class).verify();
+        new Documenter(modules)
+                .writeModulesAsPlantUml()
+                .writeIndividualModulesAsPlantUml();
     }
 }

@@ -1,4 +1,4 @@
-package com.lbk.socialbanking.dashboard.web.dto;
+package com.lbk.socialbanking.dashboard.web;
 
 import com.lbk.socialbanking.account.api.dto.AccountSummary;
 import com.lbk.socialbanking.account.api.dto.PayeeItem;

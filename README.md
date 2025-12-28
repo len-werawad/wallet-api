@@ -91,6 +91,10 @@ All modules:
 - `dashboard` – landing-page aggregation (greeting + key summaries)
 - `transaction` – transaction lists and summaries (per account)
 
+Module Diagram (Spring Modulith)
+
+![Module Diagram](./docs/architecture/components.png)
+
 DB migrations:
 
 - `src/main/resources/db/migration/`
@@ -227,8 +231,8 @@ podman compose exec -T mysql mysql -uapp -papp social_banking_db < sql_data_dump
 
 Once the API is running:
 
-- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Swagger UI: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+- OpenAPI JSON: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
 
 ---
 
@@ -373,7 +377,6 @@ Generate/update the PlantUML sources (runs `ModularityTest#createDocumentation()
 Generated sources:
 - `build/spring-modulith-docs/components.puml` (overall module diagram)
 - `build/spring-modulith-docs/module-*.puml` (per-module diagrams)
-- `build/spring-modulith-docs/all-docs.adoc` (aggregated docs)
 
 
 ## Stress Test Report
@@ -386,24 +389,12 @@ Generated sources:
 - User flow: Login (PIN) → Dashboard
 
 ### Configuration
-- **Peak load**: 100 Virtual Users
-- **Duration**: ~3 minutes
-- **Think time**: 100–400 ms (simulate real user behavior)
+- **Peak load**: 300 Virtual Users
+- **Duration**: ~2 minutes
 
 ### Test Results
-- [View K6 Stress Test Report](./docs/k6/summary.html)
 
-**Key Metrics** (from latest test run):
-- ✅ **Total Requests**: 15,234
-- ✅ **Success Rate**: 99.9%
-- ✅ **Avg Response Time**: 45ms
-- ✅ **P95 Response Time**: 120ms
-- ✅ **Max Virtual Users**: 100
-
-To view the full interactive report locally:
-```bash
-open docs/k6/summary.html
-```
+  ![K6 Stress Test Report](./docs/k6/k6-report.png)
 
 ---
 
@@ -418,7 +409,6 @@ Potential follow-ups to improve security and performance:
 ---
 ## Author
 **Werawad Ruangjaroon**
-- Architecture & Implementation
 - Contact: [GitHub](https://github.com/len-werawad)
 - Blog: [Medium](https://medium.com/@len.werawad)
 

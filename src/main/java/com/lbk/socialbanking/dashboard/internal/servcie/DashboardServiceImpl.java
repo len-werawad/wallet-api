@@ -7,7 +7,7 @@ import com.lbk.socialbanking.account.api.dto.LoanItem;
 import com.lbk.socialbanking.account.api.dto.PayeeItem;
 import com.lbk.socialbanking.common.api.dto.PageRequest;
 import com.lbk.socialbanking.customer.api.CustomerService;
-import com.lbk.socialbanking.dashboard.web.dto.DashboardResponse;
+import com.lbk.socialbanking.dashboard.web.DashboardResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;

@@ -9,7 +9,7 @@ import com.lbk.socialbanking.common.api.dto.PageInfo;
 import com.lbk.socialbanking.common.api.dto.PageRequest;
 import com.lbk.socialbanking.common.api.dto.PaginatedResponse;
 import com.lbk.socialbanking.customer.api.CustomerService;
-import com.lbk.socialbanking.dashboard.web.dto.DashboardResponse;
+import com.lbk.socialbanking.dashboard.web.DashboardResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

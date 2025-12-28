@@ -1,9 +1,8 @@
-package com.lbk.socialbanking.appconfig.internal.config;
+package com.lbk.socialbanking.common.config;
 
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -16,7 +15,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class CacheConfig {
 
     @Bean
-    @Primary
     RedisCacheManager cacheManager(RedisConnectionFactory cf) {
 
         RedisCacheConfiguration defaultConfig =
