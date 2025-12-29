@@ -292,7 +292,7 @@ All other `/v1/**` endpoints require a valid JWT Bearer token in the `Authorizat
 1. **Login**: POST to `/v1/auth/login/pin` with credentials:
    ```json
    {
-     "userId": "user123",
+     "userId": "000018b0e1a211ef95a30242ac180002",
      "pin": 123456
    }
    ```
