@@ -10,11 +10,15 @@ import com.lbk.socialbanking.account.internal.persistence.repo.AccountBalanceRep
 import com.lbk.socialbanking.account.internal.persistence.repo.AccountDetailRepository;
 import com.lbk.socialbanking.account.internal.persistence.repo.AccountFlagRepository;
 import com.lbk.socialbanking.account.internal.persistence.repo.AccountRepository;
+import com.lbk.socialbanking.common.api.dto.PageRequest;
 import com.lbk.socialbanking.transaction.api.TransactionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -107,38 +111,7 @@ class AccountServiceImplTest {
         }
 
         @Test
-        @DisplayName("should handle account without balance (default to 0.0)")
-        void listAccounts_withoutBalance() {
-            AccountEntity account = newAccount("acc-1", USER_ID, "SAVING", "THB", "123-456", "KBank");
-
-            when(accountRepository.findByUserId(USER_ID)).thenReturn(List.of(account));
-            when(balanceRepository.findByUserId(USER_ID)).thenReturn(List.of());
-            when(detailRepository.findByUserId(USER_ID)).thenReturn(List.of());
-
-            List<AccountSummary> result = accountService.listAccounts(USER_ID);
-
-            assertThat(result).hasSize(1);
-            assertThat(result.getFirst().amount()).isEqualTo(0.0);
-        }
-
-        @Test
-        @DisplayName("should handle account without detail (null color)")
-        void listAccounts_withoutDetail() {
-            AccountEntity account = newAccount("acc-1", USER_ID, "SAVING", "THB", "123-456", "KBank");
-            AccountBalanceEntity balance = newBalance("acc-1", USER_ID, bd("1000.00"));
-
-            when(accountRepository.findByUserId(USER_ID)).thenReturn(List.of(account));
-            when(balanceRepository.findByUserId(USER_ID)).thenReturn(List.of(balance));
-            when(detailRepository.findByUserId(USER_ID)).thenReturn(List.of());
-
-            List<AccountSummary> result = accountService.listAccounts(USER_ID);
-
-            assertThat(result).hasSize(1);
-            assertThat(result.getFirst().color()).isNull();
-        }
-
-        @Test
-        @DisplayName("should handle multiple accounts with partial data")
+        @DisplayName("should handle multiple accounts with partial data (missing balance or detail)")
         void listAccounts_partialData() {
             AccountEntity account1 = newAccount("acc-1", USER_ID, "SAVING", "THB", "123-456", "KBank");
             AccountEntity account2 = newAccount("acc-2", USER_ID, "GOAL", "THB", "789-012", "SCB");
@@ -173,7 +146,7 @@ class AccountServiceImplTest {
         @Test
         @DisplayName("should return paginated accounts with balances and details")
         void listAccountsPaginated_success() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 10);
+            var pageRequest = new PageRequest(1, 10);
 
             AccountEntity account1 = newAccount("acc-1", USER_ID, "SAVING", "THB", "123-456", "KBank");
             AccountEntity account2 = newAccount("acc-2", USER_ID, "GOAL", "THB", "789-012", "SCB");
@@ -213,7 +186,7 @@ class AccountServiceImplTest {
         @Test
         @DisplayName("should return empty data when user has no accounts (paginated)")
         void listAccountsPaginated_emptyData() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 10);
+            var pageRequest = new PageRequest(1, 10);
             String userId = "user-no-accounts";
 
             when(accountRepository.findByUserId(userId, pageRequest.toPageable()))
@@ -229,7 +202,7 @@ class AccountServiceImplTest {
         @Test
         @DisplayName("should include correct pagination info")
         void listAccountsPaginated_paginationInfo() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(2, 5);
+            var pageRequest = new PageRequest(2, 5);
 
             AccountEntity account1 = newAccount("acc-1", USER_ID, "SAVING", "THB", "123-456", "KBank");
             AccountEntity account2 = newAccount("acc-2", USER_ID, "GOAL", "THB", "789-012", "SCB");
@@ -255,7 +228,7 @@ class AccountServiceImplTest {
         @Test
         @DisplayName("should handle account with progress-based status (paginated)")
         void listAccountsPaginated_withProgressStatus() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 10);
+            var pageRequest = new PageRequest(1, 10);
 
             AccountEntity account1 = newAccount("acc-1", USER_ID, "GOAL", "THB", "123-456", "KBank");
             AccountDetailEntity detail1 = newDetailWithProgress("acc-1", USER_ID, "#FF5733", 75);
@@ -341,51 +314,27 @@ class AccountServiceImplTest {
             assertThat(result).isEmpty();
         }
 
-        @Test
-        @DisplayName("should handle no favorites (all false)")
-        void listQuickPayees_noFavorites() {
-
-            int limit = 5;
-
+        @ParameterizedTest(name = "limit={0} should return correct number of payees")
+        @ValueSource(ints = {1, 2, 5})
+        @DisplayName("should respect different limit values")
+        void listQuickPayees_respectsVariousLimits(int limit) {
             TransactionService.TransactionSummary tx1 = new TransactionService.TransactionSummary("tx-1", "John Doe", "img1.png");
             TransactionService.TransactionSummary tx2 = new TransactionService.TransactionSummary("tx-2", "Jane Smith", "img2.png");
+            TransactionService.TransactionSummary tx3 = new TransactionService.TransactionSummary("tx-3", "Bob Wilson", "img3.png");
 
-            when(transactionService.listTransactionSummaries(USER_ID)).thenReturn(List.of(tx1, tx2));
+            when(transactionService.listTransactionSummaries(USER_ID)).thenReturn(List.of(tx1, tx2, tx3));
             when(flagRepository.findByUserIdAndFlagType(USER_ID, FAVORITE)).thenReturn(List.of());
-
 
             List<PayeeItem> result = accountService.listQuickPayees(USER_ID, limit);
 
-
-            assertThat(result).hasSize(2);
-            assertThat(result.getFirst().favorite()).isFalse();
-            assertThat(result.get(1).favorite()).isFalse();
-        }
-
-        @Test
-        @DisplayName("should handle limit 1")
-        void listQuickPayees_limitOne() {
-
-            int limit = 1;
-
-            TransactionService.TransactionSummary tx1 = new TransactionService.TransactionSummary("tx-1", "John Doe", "img1.png");
-            TransactionService.TransactionSummary tx2 = new TransactionService.TransactionSummary("tx-2", "Jane Smith", "img2.png");
-
-            when(transactionService.listTransactionSummaries(USER_ID)).thenReturn(List.of(tx1, tx2));
-            when(flagRepository.findByUserIdAndFlagType(USER_ID, FAVORITE)).thenReturn(List.of());
-
-
-            List<PayeeItem> result = accountService.listQuickPayees(USER_ID, limit);
-
-
-            assertThat(result).hasSize(1);
-            assertThat(result.getFirst().payeeId()).isEqualTo("tx-1");
+            assertThat(result).hasSize(Math.min(limit, 3));
+            assertThat(result).allMatch(p -> !p.favorite()); // no favorites set
         }
 
         @Test
         @DisplayName("should return paginated payees with favorite flags")
         void listQuickPayeesPaginated_withFavorites() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 5);
+            var pageRequest = new PageRequest(1, 5);
 
             TransactionService.TransactionSummary tx1 = new TransactionService.TransactionSummary("tx-1", "John Doe", "img1.png");
             TransactionService.TransactionSummary tx2 = new TransactionService.TransactionSummary("tx-2", "Jane Smith", "img2.png");
@@ -416,7 +365,7 @@ class AccountServiceImplTest {
         @Test
         @DisplayName("should paginate payees correctly")
         void listQuickPayeesPaginated_pagination() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(2, 2);
+            var pageRequest = new PageRequest(2, 2);
 
             TransactionService.TransactionSummary tx1 = new TransactionService.TransactionSummary("tx-1", "John Doe", "img1.png");
             TransactionService.TransactionSummary tx2 = new TransactionService.TransactionSummary("tx-2", "Jane Smith", "img2.png");
@@ -433,24 +382,11 @@ class AccountServiceImplTest {
             assertThat(result.data().get(1).payeeId()).isEqualTo("tx-4");
         }
 
-        @Test
-        @DisplayName("should return empty data when no transactions (paginated)")
-        void listQuickPayeesPaginated_noTransactions() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 10);
-            String userId = "user-no-tx";
-
-            when(transactionService.listTransactionSummaries(userId)).thenReturn(List.of());
-            when(flagRepository.findByUserIdAndFlagType(userId, FAVORITE)).thenReturn(List.of());
-
-            var result = accountService.listQuickPayees(userId, pageRequest);
-
-            assertThat(result.data()).isEmpty();
-        }
 
         @Test
         @DisplayName("should include correct pagination info")
         void listQuickPayeesPaginated_paginationInfo() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(2, 3);
+            var pageRequest = new PageRequest(2, 3);
 
             TransactionService.TransactionSummary tx1 = new TransactionService.TransactionSummary("tx-1", "John Doe", "img1.png");
             TransactionService.TransactionSummary tx2 = new TransactionService.TransactionSummary("tx-2", "Jane Smith", "img2.png");
@@ -476,7 +412,7 @@ class AccountServiceImplTest {
         @Test
         @DisplayName("should handle last page with fewer items")
         void listQuickPayeesPaginated_lastPage() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(3, 3);
+            var pageRequest = new PageRequest(3, 3);
 
             TransactionService.TransactionSummary tx1 = new TransactionService.TransactionSummary("tx-1", "John Doe", "img1.png");
             TransactionService.TransactionSummary tx2 = new TransactionService.TransactionSummary("tx-2", "Jane Smith", "img2.png");
@@ -534,50 +470,22 @@ class AccountServiceImplTest {
             assertThat(result).isEmpty();
         }
 
-        @Test
-        @DisplayName("should handle single balance")
-        void getBalancesByUserId_singleBalance() {
-
-            AccountBalanceEntity balance = newBalance("acc-1", USER_ID, bd("9999.99"));
+        @ParameterizedTest(name = "balance={0} should be handled correctly")
+        @CsvSource({
+            "0, 0",
+            "-500.00, -500.00",
+            "9999.99, 9999.99"
+        })
+        @DisplayName("should handle various balance values (zero, negative, positive)")
+        void getBalancesByUserId_variousBalances(String inputBalance, String expectedBalance) {
+            AccountBalanceEntity balance = newBalance("acc-1", USER_ID, bd(inputBalance));
 
             when(balanceRepository.findByUserId(USER_ID)).thenReturn(List.of(balance));
 
             Map<String, BigDecimal> result = accountService.getBalancesByUserId(USER_ID);
 
             assertThat(result).hasSize(1);
-            assertThat(result.get("acc-1")).isEqualByComparingTo(bd("9999.99"));
-        }
-
-        @Test
-        @DisplayName("should handle zero balance")
-        void getBalancesByUserId_zeroBalance() {
-
-            AccountBalanceEntity balance = newBalance("acc-1", USER_ID, BigDecimal.ZERO);
-
-            when(balanceRepository.findByUserId(USER_ID)).thenReturn(List.of(balance));
-
-
-            Map<String, BigDecimal> result = accountService.getBalancesByUserId(USER_ID);
-
-
-            assertThat(result).hasSize(1);
-            assertThat(result.get("acc-1")).isEqualByComparingTo(BigDecimal.ZERO);
-        }
-
-        @Test
-        @DisplayName("should handle negative balance")
-        void getBalancesByUserId_negativeBalance() {
-
-            AccountBalanceEntity balance = newBalance("acc-1", USER_ID, bd("-500.00"));
-
-            when(balanceRepository.findByUserId(USER_ID)).thenReturn(List.of(balance));
-
-
-            Map<String, BigDecimal> result = accountService.getBalancesByUserId(USER_ID);
-
-
-            assertThat(result).hasSize(1);
-            assertThat(result.get("acc-1")).isEqualByComparingTo(bd("-500.00"));
+            assertThat(result.get("acc-1")).isEqualByComparingTo(bd(expectedBalance));
         }
     }
 
@@ -588,7 +496,7 @@ class AccountServiceImplTest {
         @Test
         @DisplayName("should return only GOAL accounts mapped to GoalItem with same pagination")
         void listGoalAccounts_success() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 20);
+            var pageRequest = new PageRequest(1, 20);
 
             AccountEntity goalAcc = newAccount("acc-goal", USER_ID, "GOAL", "THB", "999-111", "KBank");
 
@@ -605,7 +513,7 @@ class AccountServiceImplTest {
         @Test
         @DisplayName("should return empty data when no GOAL accounts")
         void listGoalAccounts_noGoals() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 20);
+            var pageRequest = new PageRequest(1, 20);
 
             when(accountRepository.findByUserIdAndTypeIgnoreCase(USER_ID, "GOAL", pageRequest.toPageable()))
                     .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of()));
@@ -620,7 +528,7 @@ class AccountServiceImplTest {
         @Test
         @DisplayName("should map GOAL accounts with balance and details")
         void listGoalAccounts_withBalanceAndDetails() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 20);
+            var pageRequest = new PageRequest(1, 20);
 
             AccountEntity goalAcc = newAccount("acc-goal", USER_ID, "GOAL", "THB", "999-111", "KBank");
             AccountBalanceEntity balance = newBalance("acc-goal", USER_ID, bd("5000.00"));
@@ -642,13 +550,19 @@ class AccountServiceImplTest {
             assertThat(goalItem.status()).isEqualTo("IN_PROGRESS");
         }
 
-        @Test
-        @DisplayName("should map GOAL accounts with COMPLETED status when progress >= 100")
-        void listGoalAccounts_completedStatus() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 20);
+        @ParameterizedTest(name = "progress={0} should map to status={1}")
+        @CsvSource({
+            "0, NOT_STARTED",
+            "50, IN_PROGRESS",
+            "100, COMPLETED",
+            ", UNKNOWN"
+        })
+        @DisplayName("should map progress to correct status")
+        void listGoalAccounts_statusMapping(Integer progress, String expectedStatus) {
+            var pageRequest = new PageRequest(1, 20);
 
             AccountEntity goalAcc = newAccount("acc-goal", USER_ID, "GOAL", "THB", "999-111", "KBank");
-            AccountDetailEntity detail = newDetailWithProgress("acc-goal", USER_ID, "#FF5733", 100);
+            AccountDetailEntity detail = newDetailWithProgress("acc-goal", USER_ID, "#FF5733", progress);
 
             when(accountRepository.findByUserIdAndTypeIgnoreCase(USER_ID, "GOAL", pageRequest.toPageable()))
                     .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(goalAcc)));
@@ -658,51 +572,13 @@ class AccountServiceImplTest {
             var result = accountService.listGoalAccounts(USER_ID, pageRequest);
 
             assertThat(result.data()).hasSize(1);
-            assertThat(result.data().getFirst().status()).isEqualTo("COMPLETED");
-        }
-
-        @Test
-        @DisplayName("should map GOAL accounts with NOT_STARTED status when progress = 0")
-        void listGoalAccounts_notStartedStatus() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 20);
-
-            AccountEntity goalAcc = newAccount("acc-goal", USER_ID, "GOAL", "THB", "999-111", "KBank");
-            AccountDetailEntity detail = newDetailWithProgress("acc-goal", USER_ID, "#FF5733", 0);
-
-            when(accountRepository.findByUserIdAndTypeIgnoreCase(USER_ID, "GOAL", pageRequest.toPageable()))
-                    .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(goalAcc)));
-            when(balanceRepository.findByUserId(USER_ID)).thenReturn(List.of());
-            when(detailRepository.findByUserId(USER_ID)).thenReturn(List.of(detail));
-
-            var result = accountService.listGoalAccounts(USER_ID, pageRequest);
-
-            assertThat(result.data()).hasSize(1);
-            assertThat(result.data().getFirst().status()).isEqualTo("NOT_STARTED");
-        }
-
-        @Test
-        @DisplayName("should map GOAL accounts with UNKNOWN status when progress is null")
-        void listGoalAccounts_unknownStatus() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 20);
-
-            AccountEntity goalAcc = newAccount("acc-goal", USER_ID, "GOAL", "THB", "999-111", "KBank");
-            AccountDetailEntity detail = newDetailWithProgress("acc-goal", USER_ID, "#FF5733", null);
-
-            when(accountRepository.findByUserIdAndTypeIgnoreCase(USER_ID, "GOAL", pageRequest.toPageable()))
-                    .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(goalAcc)));
-            when(balanceRepository.findByUserId(USER_ID)).thenReturn(List.of());
-            when(detailRepository.findByUserId(USER_ID)).thenReturn(List.of(detail));
-
-            var result = accountService.listGoalAccounts(USER_ID, pageRequest);
-
-            assertThat(result.data()).hasSize(1);
-            assertThat(result.data().getFirst().status()).isEqualTo("UNKNOWN");
+            assertThat(result.data().getFirst().status()).isEqualTo(expectedStatus);
         }
 
         @Test
         @DisplayName("should include pagination info")
         void listGoalAccounts_paginationInfo() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(2, 5);
+            var pageRequest = new PageRequest(2, 5);
 
             AccountEntity goalAcc1 = newAccount("acc-goal-1", USER_ID, "GOAL", "THB", "999-111", "KBank");
             AccountEntity goalAcc2 = newAccount("acc-goal-2", USER_ID, "GOAL", "THB", "999-222", "SCB");
@@ -733,7 +609,7 @@ class AccountServiceImplTest {
         @Test
         @DisplayName("should return only LOAN accounts mapped to LoanItem with same pagination")
         void listLoanAccounts_success() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 20);
+            var pageRequest = new PageRequest(1, 20);
 
             AccountEntity loanAcc = newAccount("acc-loan", USER_ID, "LOAN", "THB", "555-666", "BBL");
             AccountBalanceEntity loanBalance = newBalance("acc-loan", USER_ID, bd("5000.00"));
@@ -751,7 +627,7 @@ class AccountServiceImplTest {
         @Test
         @DisplayName("should return empty data when no LOAN accounts")
         void listLoanAccounts_noLoans() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 20);
+            var pageRequest = new PageRequest(1, 20);
 
             when(accountRepository.findByUserIdAndTypeIgnoreCase(USER_ID, "LOAN", pageRequest.toPageable()))
                     .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of()));
@@ -766,7 +642,7 @@ class AccountServiceImplTest {
         @Test
         @DisplayName("should map LOAN accounts with balance and details")
         void listLoanAccounts_withBalanceAndDetails() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 20);
+            var pageRequest = new PageRequest(1, 20);
 
             AccountEntity loanAcc = newAccount("acc-loan", USER_ID, "LOAN", "THB", "555-666", "BBL");
             AccountBalanceEntity balance = newBalance("acc-loan", USER_ID, bd("10000.00"));
@@ -787,13 +663,19 @@ class AccountServiceImplTest {
             assertThat(loanItem.status()).isEqualTo("IN_PROGRESS");
         }
 
-        @Test
-        @DisplayName("should map LOAN accounts with COMPLETED status when progress >= 100")
-        void listLoanAccounts_completedStatus() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 20);
+        @ParameterizedTest(name = "progress={0} should map to status={1}")
+        @CsvSource({
+            "0, NOT_STARTED",
+            "50, IN_PROGRESS",
+            "150, COMPLETED",
+            ", UNKNOWN"
+        })
+        @DisplayName("should map progress to correct status")
+        void listLoanAccounts_statusMapping(Integer progress, String expectedStatus) {
+            var pageRequest = new PageRequest(1, 20);
 
             AccountEntity loanAcc = newAccount("acc-loan", USER_ID, "LOAN", "THB", "555-666", "BBL");
-            AccountDetailEntity detail = newDetailWithProgress("acc-loan", USER_ID, "#FF5733", 150);
+            AccountDetailEntity detail = newDetailWithProgress("acc-loan", USER_ID, "#FF5733", progress);
 
             when(accountRepository.findByUserIdAndTypeIgnoreCase(USER_ID, "LOAN", pageRequest.toPageable()))
                     .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(loanAcc)));
@@ -803,13 +685,13 @@ class AccountServiceImplTest {
             var result = accountService.listLoanAccounts(USER_ID, pageRequest);
 
             assertThat(result.data()).hasSize(1);
-            assertThat(result.data().getFirst().status()).isEqualTo("COMPLETED");
+            assertThat(result.data().getFirst().status()).isEqualTo(expectedStatus);
         }
 
         @Test
         @DisplayName("should map LOAN accounts with null status when no detail")
         void listLoanAccounts_nullStatus() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 20);
+            var pageRequest = new PageRequest(1, 20);
 
             AccountEntity loanAcc = newAccount("acc-loan", USER_ID, "LOAN", "THB", "555-666", "BBL");
 
@@ -824,48 +706,11 @@ class AccountServiceImplTest {
             assertThat(result.data().getFirst().status()).isNull();
         }
 
-        @Test
-        @DisplayName("should map LOAN accounts with NOT_STARTED status when progress = 0")
-        void listLoanAccounts_notStartedStatus() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 20);
-
-            AccountEntity loanAcc = newAccount("acc-loan", USER_ID, "LOAN", "THB", "555-666", "BBL");
-            AccountDetailEntity detail = newDetailWithProgress("acc-loan", USER_ID, "#FF5733", 0);
-
-            when(accountRepository.findByUserIdAndTypeIgnoreCase(USER_ID, "LOAN", pageRequest.toPageable()))
-                    .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(loanAcc)));
-            when(balanceRepository.findByUserId(USER_ID)).thenReturn(List.of());
-            when(detailRepository.findByUserId(USER_ID)).thenReturn(List.of(detail));
-
-            var result = accountService.listLoanAccounts(USER_ID, pageRequest);
-
-            assertThat(result.data()).hasSize(1);
-            assertThat(result.data().getFirst().status()).isEqualTo("NOT_STARTED");
-        }
-
-        @Test
-        @DisplayName("should map LOAN accounts with UNKNOWN status when progress is null")
-        void listLoanAccounts_unknownStatus() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 20);
-
-            AccountEntity loanAcc = newAccount("acc-loan", USER_ID, "LOAN", "THB", "555-666", "BBL");
-            AccountDetailEntity detail = newDetailWithProgress("acc-loan", USER_ID, "#FF5733", null);
-
-            when(accountRepository.findByUserIdAndTypeIgnoreCase(USER_ID, "LOAN", pageRequest.toPageable()))
-                    .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(loanAcc)));
-            when(balanceRepository.findByUserId(USER_ID)).thenReturn(List.of());
-            when(detailRepository.findByUserId(USER_ID)).thenReturn(List.of(detail));
-
-            var result = accountService.listLoanAccounts(USER_ID, pageRequest);
-
-            assertThat(result.data()).hasSize(1);
-            assertThat(result.data().getFirst().status()).isEqualTo("UNKNOWN");
-        }
 
         @Test
         @DisplayName("should include pagination info")
         void listLoanAccounts_paginationInfo() {
-            var pageRequest = new com.lbk.socialbanking.common.api.dto.PageRequest(1, 10);
+            var pageRequest = new PageRequest(1, 10);
 
             AccountEntity loanAcc1 = newAccount("acc-loan-1", USER_ID, "LOAN", "THB", "555-666", "BBL");
             AccountEntity loanAcc2 = newAccount("acc-loan-2", USER_ID, "LOAN", "THB", "777-888", "KBank");

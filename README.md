@@ -257,7 +257,7 @@ All other `/v1/**` endpoints require a valid JWT Bearer token in the `Authorizat
    ```json
    {
      "userId": "user123",
-     "pin": "123456"
+     "pin": 123456
    }
    ```
 
@@ -267,7 +267,8 @@ All other `/v1/**` endpoints require a valid JWT Bearer token in the `Authorizat
      "data": {
        "accessToken": "eyJhbGciOiJIUzI1NiIs...",
        "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
-       "expiresIn": 900000
+       "expiresInSeconds": 900,
+       "tokenType": "Bearer"
      }
    }
    ```
