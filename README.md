@@ -17,6 +17,8 @@ The system follows a **modular monolithic architecture** using Spring Modulith p
   - [Loading Mock Data](#loading-mock-data)
 - [Environment Variables](#environment-variables)
 - [Database: Migration & Mock Data](#database-migration--mock-data)
+  - [Schema migrations (Flyway)](#schema-migrations-flyway)
+  - [Loading Mock Data](#loading-mock-data)
 - [API Documentation (Swagger)](#api-documentation-swagger)
 - [Authentication](#authentication)
 - [Main Endpoints (v1)](#main-endpoints-v1)
@@ -160,15 +162,6 @@ docker compose down -v
 
 ---
 
-### Loading Mock Data
-
-After services are running, load the SQL dump:
-
-```bash
-docker compose exec -T mysql mysql -uapp -papp social_banking_db < sql_data_dump.sql
-```
----
-
 > **Note**: 
 > - The `.env` file provides environment variables for container networking.
 > - For local development without Docker, start only dependencies: `podman compose up mysql redis -d`, then run `./gradlew bootRun`
@@ -248,23 +241,26 @@ Spring reads configuration from `src/main/resources/application.yml`.
 
 ### Schema migrations (Flyway)
 
-When the API starts with `FLYWAY_ENABLED=true`, Flyway runs migrations in:
+When the API starts with `FLYWAY_ENABLED=true`, Flyway runs schema migrations in:
 
 - `classpath:db/migration`
 
-### Mock data
+### Loading Mock Data
 
-This repository also includes a SQL dump file:
+After services are running, load the mock data:
 
-- `sql_data_dump.sql`
+1. **Download** the SQL dump from Google Drive:
+   - [sql_data_dump.zip](https://drive.google.com/file/d/13VJhtqXpDGxCWh3aEIA6QDTnzyJyvSaV/view?usp=sharing)
 
-You can load it into the running MySQL container.
+2. **Extract** the ZIP file:
+   ```bash
+   unzip sql_data_dump.zip
+   ```
 
-Example (Docker):
-
-```bash
-docker compose exec -T mysql mysql -uapp -papp social_banking_db < sql_data_dump.sql
-```
+3. **Load** into the running MySQL container:
+   ```bash
+   docker compose exec -T mysql mysql -uapp -papp social_banking_db < sql_data_dump.sql
+   ```
 ---
 
 ## API Documentation (Swagger)
