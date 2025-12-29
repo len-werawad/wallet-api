@@ -1,5 +1,6 @@
 package com.lbk.socialbanking.dashboard.web;
 
+import com.lbk.socialbanking.common.api.dto.SuccessResponse;
 import com.lbk.socialbanking.dashboard.internal.servcie.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -23,7 +24,7 @@ public class DashboardController {
 
     @Operation(summary = "Get dashboard data", description = "Aggregate greeting, accounts, payees, goals, and loans data for landing page")
     @GetMapping
-    public DashboardResponse get(Authentication auth) {
-        return dashboardService.getDashboard(auth.getName());
+    public SuccessResponse<DashboardResponse> get(Authentication auth) {
+        return SuccessResponse.of(dashboardService.getDashboard(auth.getName()));
     }
 }

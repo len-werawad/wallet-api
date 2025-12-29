@@ -1,6 +1,7 @@
 package com.lbk.socialbanking.appconfig.web;
 
 import com.lbk.socialbanking.appconfig.internal.service.AppConfigService;
+import com.lbk.socialbanking.common.api.dto.SuccessResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.validation.annotation.Validated;
@@ -22,11 +23,11 @@ public class AppConfigController {
     }
 
     @GetMapping("/config")
-    public AppConfigResponse getConfig(
+    public SuccessResponse<AppConfigResponse> getConfig(
             @RequestParam @NotBlank(message = "environment is required") String environment,
             @RequestParam @NotBlank(message = "app version is required") String appVersion,
             @RequestParam @NotBlank(message = "platform is required") String platform
     ) {
-        return appConfigService.getConfig(environment, appVersion, platform);
+        return SuccessResponse.of(appConfigService.getConfig(environment, appVersion, platform));
     }
 }

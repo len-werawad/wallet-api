@@ -7,6 +7,7 @@ import com.lbk.socialbanking.account.api.dto.LoanItem;
 import com.lbk.socialbanking.account.api.dto.PayeeItem;
 import com.lbk.socialbanking.common.api.dto.PageRequest;
 import com.lbk.socialbanking.common.api.dto.PaginatedResponse;
+import com.lbk.socialbanking.common.api.dto.SuccessResponse;
 import com.lbk.socialbanking.transaction.api.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -44,13 +45,13 @@ public class AccountsController {
 
     @Operation(summary = "Get Account Transactions", description = "Retrieve a paginated list of transactions for a specific account")
     @GetMapping("/{accountId}/transactions")
-    public TransactionService.TransactionsPage transactions(
+    public SuccessResponse<TransactionService.TransactionsPage> transactions(
             Authentication auth,
             @PathVariable String accountId,
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int limit
     ) {
-        return transactionService.listTransactions(auth.getName(), accountId, cursor, limit);
+        return SuccessResponse.of(transactionService.listTransactions(auth.getName(), accountId, cursor, limit));
     }
 
     @Operation(summary = "Get Goals Account", description = "Retrieve a list of goal accounts for the authenticated user")

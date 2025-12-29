@@ -159,9 +159,7 @@ After services are running, load the SQL dump:
 
 ```bash
 docker compose exec -T mysql mysql -uapp -papp social_banking_db < sql_data_dump.sql
-# or: podman compose exec -T mysql mysql -uapp -papp social_banking_db < sql_data_dump.sql
 ```
-
 ---
 
 > **Note**: 
@@ -174,27 +172,68 @@ docker compose exec -T mysql mysql -uapp -papp social_banking_db < sql_data_dump
 
 Spring reads configuration from `src/main/resources/application.yml`.
 
+### Spring & Server
+
 | Name | Default value | Description |
 |---|---|---|
-| `SPRING_PROFILES_ACTIVE` | `dev` | Spring profile to activate. |
+| `SPRING_PROFILES_ACTIVE` | `local` | Spring profile to activate. |
 | `SERVER_PORT` | `8080` | HTTP port for the API server. |
-| `LOG_LEVEL` | `ERROR` | Root logging level (`application-dev.yml` overrides to `INFO`). |
-| `DB_URL` | `jdbc:mysql://localhost:3306/social_banking_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC` | JDBC URL for MySQL. |
+| `LOG_LEVEL` | `INFO` | Root logging level. |
+
+### JWT Configuration
+
+| Name | Default value | Description |
+|---|---|---|
+| `JWT_SECRET` | `my-super-secret-jwt-key-32-bytes!!` | JWT signing secret (set a secure value in production). |
+| `JWT_ISSUER` | `social-banking-api` | JWT issuer claim (`iss`). |
+| `JWT_ACCESS_TOKEN_EXPIRATION` | `900000` | Access token expiration (ms). |
+| `JWT_REFRESH_TOKEN_EXPIRATION` | `604800000` | Refresh token expiration (ms). |
+
+### MySQL Container
+
+| Name | Default value | Description |
+|---|---|---|
+| `MYSQL_DATABASE` | `social_banking_db` | Database name to create. |
+| `MYSQL_USER` | `app` | MySQL user to create. |
+| `MYSQL_PASSWORD` | `app` | MySQL user password. |
+| `MYSQL_ROOT_PASSWORD` | `root` | MySQL root password. |
+| `MYSQL_PORT` | `3306` | MySQL port to expose. |
+
+### Database Connection (HikariCP)
+
+| Name | Default value | Description |
+|---|---|---|
+| `DB_URL` | `jdbc:mysql://mysql:3306/social_banking_db?...` | JDBC URL for MySQL. |
 | `DB_USERNAME` | `app` | MySQL username used by the application. |
 | `DB_PASSWORD` | `app` | MySQL password used by the application. |
-| `DB_POOL_SIZE` | `20` | HikariCP max pool size. |
-| `DB_POOL_MIN_IDLE` | `5` | HikariCP minimum idle connections. |
+| `DB_POOL_SIZE` | `50` | HikariCP max pool size. |
+| `DB_POOL_MIN_IDLE` | `20` | HikariCP minimum idle connections. |
 | `DB_CONNECTION_TIMEOUT` | `10000` | HikariCP connection timeout (ms). |
 | `DB_IDLE_TIMEOUT` | `300000` | HikariCP idle timeout (ms). |
 | `DB_MAX_LIFETIME` | `1500000` | HikariCP max lifetime (ms). |
-| `FLYWAY_ENABLED` | `true` | Enable Flyway migrations on startup. |
-| `REDIS_HOST` | `localhost` | Redis host for cache/token support. |
+
+### Redis Configuration
+
+| Name | Default value | Description |
+|---|---|---|
+| `REDIS_HOST` | `redis` | Redis host (use `localhost` for local dev). |
 | `REDIS_PORT` | `6379` | Redis port. |
 | `REDIS_TIMEOUT` | `2000ms` | Redis client timeout. |
-| `JWT_SECRET` | `my-super-secret-jwt-key-32-bytes!!` | JWT signing secret (set a secure value in production). |
-| `JWT_ISSUER` | `wallet-api` | JWT issuer claim (`iss`). |
-| `JWT_ACCESS_TOKEN_EXPIRATION` | `900000` | Access token expiration (ms). |
-| `JWT_REFRESH_TOKEN_EXPIRATION` | `604800000` | Refresh token expiration (ms). |
+
+### Redis Connection Pool (Lettuce)
+
+| Name | Default value | Description |
+|---|---|---|
+| `REDIS_POOL_MAX_ACTIVE` | `50` | Maximum active connections in the pool. |
+| `REDIS_POOL_MAX_IDLE` | `20` | Maximum idle connections in the pool. |
+| `REDIS_POOL_MIN_IDLE` | `10` | Minimum idle connections in the pool. |
+| `REDIS_POOL_MAX_WAIT` | `2000ms` | Maximum wait time for a connection. |
+
+### Flyway
+
+| Name | Default value | Description |
+|---|---|---|
+| `FLYWAY_ENABLED` | `true` | Enable Flyway migrations on startup. |
 
 ---
 
@@ -218,12 +257,6 @@ Example (Docker):
 
 ```bash
 docker compose exec -T mysql mysql -uapp -papp social_banking_db < sql_data_dump.sql
-```
-
-Example (Podman):
-
-```bash
-podman compose exec -T mysql mysql -uapp -papp social_banking_db < sql_data_dump.sql
 ```
 ---
 
@@ -390,7 +423,7 @@ Generated sources:
 - User flow: Login (PIN) → Dashboard
 
 ### Configuration
-- **Peak load**: 300 Virtual Users
+- **Peak load**: 600 Virtual Users
 - **Duration**: ~2 minutes
 
 ### Test Results

@@ -1,6 +1,7 @@
 package com.lbk.socialbanking.auth.web;
 
 import com.lbk.socialbanking.auth.internal.service.AuthService;
+import com.lbk.socialbanking.common.api.dto.SuccessResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,12 +21,12 @@ public class AuthController {
     }
 
     @PostMapping("/login/pin")
-    public TokenResponse login(@RequestBody @Valid LoginRequest request) {
-        return facade.login(request);
+    public SuccessResponse<TokenResponse> login(@RequestBody @Valid LoginRequest request) {
+        return SuccessResponse.of(facade.login(request));
     }
 
     @PostMapping("/refresh")
-    public TokenResponse refresh(@RequestBody @Valid RefreshRequest request) {
-        return facade.refresh(request);
+    public SuccessResponse<TokenResponse> refresh(@RequestBody @Valid RefreshRequest request) {
+        return SuccessResponse.of(facade.refresh(request));
     }
 }

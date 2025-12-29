@@ -3,6 +3,10 @@ package com.lbk.socialbanking.common.internal;
 import com.lbk.socialbanking.common.api.ApiException;
 import com.lbk.socialbanking.common.api.dto.ErrorEnvelope;
 import com.lbk.socialbanking.common.api.dto.ErrorResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -12,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
@@ -37,6 +42,25 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request - Validation error",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ErrorEnvelope.class),
+                    examples = @ExampleObject(value = """
+                            {
+                              "error": {
+                                "status": 400,
+                                "code": "VALIDATION_ERROR",
+                                "message": "Invalid input parameters",
+                                "traceId": "abc123def456"
+                              }
+                            }
+                            """)
+            )
+    )
     public ResponseEntity<ErrorEnvelope> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
         String message = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getDefaultMessage())
@@ -55,6 +79,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorEnvelope> handleMissingHeader(MissingRequestHeaderException ex, HttpServletRequest req) {
         log.warn("Missing header error - {} {}: {}", req.getMethod(), req.getRequestURI(), ex.getMessage());
 
@@ -68,6 +93,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorEnvelope> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest req) {
         String message = ex.getConstraintViolations().stream()
                 .map(violation -> violation.getMessage())
@@ -86,6 +112,25 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ApiResponse(
+            responseCode = "500",
+            description = "Internal Server Error",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ErrorEnvelope.class),
+                    examples = @ExampleObject(value = """
+                            {
+                              "error": {
+                                "status": 500,
+                                "code": "INTERNAL_ERROR",
+                                "message": "Unexpected error",
+                                "traceId": "abc123def456"
+                              }
+                            }
+                            """)
+            )
+    )
     public ResponseEntity<ErrorEnvelope> handleOther(Exception ex, HttpServletRequest req) {
         log.error("Unexpected error - {} {}", req.getMethod(), req.getRequestURI(), ex);
         var body = new ErrorEnvelope(new ErrorResponse(
